@@ -1,8 +1,6 @@
 package jeu;
 
-import jeu.models.Balle;
-import jeu.models.Barre;
-import jeu.models.Brique;
+import jeu.models.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +14,8 @@ public class CasseBrique extends Canvas implements KeyListener {
     public static final int HAUTEUR = 600;
 
     protected ArrayList<Balle> listeBalle = new ArrayList<>();
+
+    protected ArrayList<Bonus> listeBonus = new ArrayList<>();
 
     protected ArrayList<Brique> listeBrique = new ArrayList<>();
     protected Barre barre = new Barre();
@@ -49,7 +49,7 @@ public class CasseBrique extends Canvas implements KeyListener {
 
 
 
-        for(int i = 0 ; i < 5 ; i++) {
+        for(int i = 0 ; i < 1 ; i++) {
             listeBalle.add(new Balle(20));
         }
 
@@ -71,7 +71,7 @@ public class CasseBrique extends Canvas implements KeyListener {
                 Graphics2D dessin = (Graphics2D) this.getBufferStrategy().getDrawGraphics();
 
                 // tout ce qu'on va dessiner sera disposé là
-                dessin.setColor(Color.WHITE);
+                dessin.setColor(Color.darkGray);
                 dessin.fillRect(0,0, LARGEUR, HAUTEUR);
 
                 barre.dessiner(dessin);
@@ -93,7 +93,7 @@ public class CasseBrique extends Canvas implements KeyListener {
                     ArrayList<Brique> briqueImpact = new ArrayList<>();
 
                     for(Brique brique : listeBrique) {
-                        brique.collision(balle);
+//                        brique.collision(balle);
                         if (brique.collision(balle)) {
                             briqueImpact.add(brique);
                             balle.setVitesseVerticale(-balle.getVitesseVerticale());
@@ -102,12 +102,39 @@ public class CasseBrique extends Canvas implements KeyListener {
 
                     for(Brique brique : briqueImpact) {
                         listeBrique.remove(brique);
+                        double bonusChance = (Math.random());
+                        // TODO décommenter lignes if(bonusChance) et }
+//                        if(bonusChance < 0.2) {
+                        Bonus bonus = new Bonus(brique.getX()+brique.getLargeur() /2, brique.getY() + brique.getHauteur());
+                        listeBonus.add(bonus);
+
+//                        }
                     }
+
+
 
                     if(barre.collision(balle)) {
                         balle.setVitesseVerticale(-balle.getVitesseVerticale());
                     }
                 }
+
+                int foundIndex = -1;
+                for(int i = 0; i < listeBonus.size(); i++){
+                    Bonus bonus = listeBonus.get(i);
+                    bonus.dessiner(dessin);
+                    bonus.deplacement();
+                    if(barre.collision(bonus)) {
+                        foundIndex = i;
+                    }
+                }
+
+                // TODO remove si touche bas écran
+                //  + agrandir barre si touche barre
+                if(foundIndex >= 0) {
+                    listeBonus.remove(foundIndex);
+                    barre.setLargeur(barre.getLargeur() + 10);
+                }
+
 
                 dessin.dispose();
                 this.getBufferStrategy().show();
