@@ -17,7 +17,7 @@ public class Balle extends Rond {
         super(
                 (int)(Math.random() * CasseBrique.LARGEUR),
                 (int)(Math.random() * CasseBrique.HAUTEUR),
-                new Color((float)Math.random(),(float)Math.random(),(float)Math.random())
+                new Color(218, 0, 0)
         );
         this.setVitesseHorizontale((int)(Math.random() * 5) + 2);
         this.setVitesseVerticale((int)(Math.random() * 5) + 2);

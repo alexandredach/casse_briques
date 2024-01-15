@@ -12,7 +12,7 @@ public class Barre extends Rectangle {
         super(
                 0,
                 CasseBrique.HAUTEUR - 100,
-                new Color((float)Math.random(),(float)Math.random(),(float)Math.random()),
+                new Color(241,127,0),
                 100,
                 20);
 

@@ -24,13 +24,13 @@ public class CasseBrique extends Canvas implements KeyListener {
 
         JFrame fenetre = new JFrame();
 
-        this.setSize(LARGEUR + 20, HAUTEUR + 40);
+        this.setSize(LARGEUR, HAUTEUR);
         this.setBounds(0,0, LARGEUR, HAUTEUR);
         this.setIgnoreRepaint(true);
         this.setFocusable(false);
 
         fenetre.pack();
-        fenetre.setSize(LARGEUR, HAUTEUR);
+        fenetre.setSize(LARGEUR +10, HAUTEUR);
         fenetre.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         fenetre.setResizable(false);
         fenetre.requestFocus();
@@ -49,7 +49,7 @@ public class CasseBrique extends Canvas implements KeyListener {
 
 
 
-        for(int i = 0 ; i < 1 ; i++) {
+        for(int i = 0 ; i < 3 ; i++) {
             listeBalle.add(new Balle(20));
         }
 
@@ -63,7 +63,7 @@ public class CasseBrique extends Canvas implements KeyListener {
 
 
 
-// création d'une boucle infinie pour rafraîchir la page et donner une impression d'animation
+        // création d'une boucle infinie pour rafraîchir la page et donner une impression d'animation
         while(true) {
 
             try { // try/catch servira à détecter une éventuelle interruption
@@ -71,7 +71,7 @@ public class CasseBrique extends Canvas implements KeyListener {
                 Graphics2D dessin = (Graphics2D) this.getBufferStrategy().getDrawGraphics();
 
                 // tout ce qu'on va dessiner sera disposé là
-                dessin.setColor(Color.darkGray);
+                dessin.setColor(Color.black);
                 dessin.fillRect(0,0, LARGEUR, HAUTEUR);
 
                 barre.dessiner(dessin);
@@ -103,19 +103,16 @@ public class CasseBrique extends Canvas implements KeyListener {
                     for(Brique brique : briqueImpact) {
                         listeBrique.remove(brique);
                         double bonusChance = (Math.random());
-                        // TODO décommenter lignes if(bonusChance) et }
-//                        if(bonusChance < 0.2) {
-                        Bonus bonus = new Bonus(brique.getX()+brique.getLargeur() /2, brique.getY() + brique.getHauteur());
-                        listeBonus.add(bonus);
-
-//                        }
+                        if(bonusChance < 0.2) {
+                            Bonus bonus = new Bonus(brique.getX()+brique.getLargeur() /2, brique.getY() + brique.getHauteur());
+                            listeBonus.add(bonus);
+                        }
                     }
-
-
 
                     if(barre.collision(balle)) {
                         balle.setVitesseVerticale(-balle.getVitesseVerticale());
                     }
+
                 }
 
                 int foundIndex = -1;
@@ -128,13 +125,20 @@ public class CasseBrique extends Canvas implements KeyListener {
                     }
                 }
 
-                // TODO remove si touche bas écran
-                //  + agrandir barre si touche barre
+                //  quand barre touche bonus : supprimer et agrandir barre
                 if(foundIndex >= 0) {
                     listeBonus.remove(foundIndex);
                     barre.setLargeur(barre.getLargeur() + 10);
                 }
 
+                // balles et bonus > sort si touche bas écran
+                listeBalle.removeIf(balle -> balle.getY() >= CasseBrique.HAUTEUR - balle.getDiametre() * 2);
+                listeBonus.removeIf(bonus -> bonus.getY() >= CasseBrique.HAUTEUR - bonus.getDiametre() * 2);
+
+                // si plus de balles, afficher GAME OVER
+                if (listeBalle.size() <= 0) {
+                    dessin.drawString("GAME OVER",200, 300);
+                }
 
                 dessin.dispose();
                 this.getBufferStrategy().show();

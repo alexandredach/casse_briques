@@ -19,11 +19,17 @@ public class Rond extends Sprite {
         x += vitesseHorizontale;
         y += vitesseVerticale;
 
-        if (x >= CasseBrique.LARGEUR - diametre *2 || x <= 0) {
+        if (x >= CasseBrique.LARGEUR - diametre -5 || x <= 0) {
             vitesseHorizontale = -vitesseHorizontale;
         }
 
         if (y >= CasseBrique.HAUTEUR - diametre *2 || y <= 0) {
+            vitesseVerticale = -vitesseVerticale;
+        }
+    }
+
+    public void basEcran() {
+        if (y >= CasseBrique.HAUTEUR - diametre *2) {
             vitesseVerticale = -vitesseVerticale;
         }
     }

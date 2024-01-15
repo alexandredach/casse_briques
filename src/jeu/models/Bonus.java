@@ -9,7 +9,7 @@ public class Bonus extends Rond {
     private int vitesseVerticale;
 
     public Bonus(int x, int y) {
-        super(x, y, Color.blue);
+        super(x, y, Color.yellow);
         this.setVitesseVerticale(3);
         this.setVitesseHorizontale(0);
     }
@@ -17,7 +17,8 @@ public class Bonus extends Rond {
     public void dessiner(Graphics2D dessin) {
         dessin.setColor(couleur);
         dessin.fillOval(x,y,this.getDiametre(), this.getDiametre());
-        dessin.drawString("B",x + this.getDiametre() ,y + this.getDiametre() / 2);
+        dessin.setColor(Color.black);
+        dessin.drawString("B",x + this.getDiametre() -14 ,y + this.getDiametre() -6);
 
     }
 
