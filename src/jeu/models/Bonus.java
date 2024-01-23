@@ -6,8 +6,6 @@ import java.awt.*;
 
 public class Bonus extends Rond {
 
-    private int vitesseVerticale;
-
     public Bonus(int x, int y) {
         super(x, y, Color.yellow);
         this.setVitesseVerticale(3);

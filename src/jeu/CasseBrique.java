@@ -6,9 +6,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.awt.event.MouseListener;
 
-public class CasseBrique extends Canvas implements KeyListener {
+public class CasseBrique extends Canvas implements KeyListener, MouseListener {
 
     public static final int LARGEUR = 500;
     public static final int HAUTEUR = 600;
@@ -18,7 +20,12 @@ public class CasseBrique extends Canvas implements KeyListener {
     protected ArrayList<Bonus> listeBonus = new ArrayList<>();
 
     protected ArrayList<Brique> listeBrique = new ArrayList<>();
+
+    protected ArrayList<Bouton> listeBouton = new ArrayList<>();
+
     protected Barre barre = new Barre();
+
+    protected boolean pause = false;
 
     public CasseBrique () {
 
@@ -35,6 +42,7 @@ public class CasseBrique extends Canvas implements KeyListener {
         fenetre.setResizable(false);
         fenetre.requestFocus();
         fenetre.addKeyListener(this);
+        addMouseListener(this);
 
         Container panneau = fenetre.getContentPane();
         panneau.add(this);
@@ -42,12 +50,31 @@ public class CasseBrique extends Canvas implements KeyListener {
         fenetre.setVisible(true);
         this.createBufferStrategy(2);
 
+
+        Bouton boutonPause = new Bouton("PAUSE",20,5);
+
+        boutonPause.addEvenementBouton(() -> {
+                    pause = !pause;
+                });
+
+        Bouton boutonRecommencer = new Bouton("RESTART",120,5);
+
+        boutonRecommencer.addEvenementBouton(() -> {
+            recommencer();
+                });
+
+        listeBouton.add(boutonPause);
+        listeBouton.add(boutonRecommencer);
+
+        recommencer();
         demarrer();
     }
 
-    public void demarrer() {
+    public void recommencer() {
 
-
+        pause = false;
+        listeBalle.clear();
+        listeBrique.clear();
 
         for(int i = 0 ; i < 3 ; i++) {
             listeBalle.add(new Balle(20));
@@ -55,12 +82,14 @@ public class CasseBrique extends Canvas implements KeyListener {
 
         // créer  10 x 5 briques
         // alimenter l'ArrayList listeBriques
-        for(int j = 0 ; j < 101 ; j+=20) {
+        for(int j = 40 ; j < 161 ; j+=20) {
             for(int k = 0 ; k < 501 ; k += 50) {
                 listeBrique.add(new Brique(k,j));
             }
         }
+    }
 
+    public void demarrer() {
 
 
         // création d'une boucle infinie pour rafraîchir la page et donner une impression d'animation
@@ -70,80 +99,87 @@ public class CasseBrique extends Canvas implements KeyListener {
 
                 Graphics2D dessin = (Graphics2D) this.getBufferStrategy().getDrawGraphics();
 
-                // tout ce qu'on va dessiner sera disposé là
-                dessin.setColor(Color.black);
-                dessin.fillRect(0,0, LARGEUR, HAUTEUR);
+                if(!pause) {
 
-                barre.dessiner(dessin);
+                    // tout ce qu'on va dessiner sera disposé là
+                    dessin.setColor(Color.black);
+                    dessin.fillRect(0, 0, LARGEUR, HAUTEUR);
 
-                // dessiner briques
-                for(Brique brique : listeBrique) {
-                    brique.dessiner(dessin);
-                }
+                    barre.dessiner(dessin);
 
-                for(Balle balle : listeBalle) {
-                    balle.dessiner(dessin);
-                    balle.deplacement();
+                    // dessiner briques
+                    for (Brique brique : listeBrique) {
+                        brique.dessiner(dessin);
+                    }
 
-                    // pour chaque brique, tester la collision
-                    // stocker dans une liste les briques impactées
-                    // après le foreach des briques, supprimer les briques impactées
-                    // parce qu'on ne peut pas supprimer un élément d'une liste alors qu'on parcourt cette liste
+                    for (Balle balle : listeBalle) {
+                        balle.dessiner(dessin);
+                        balle.deplacement();
 
-                    ArrayList<Brique> briqueImpact = new ArrayList<>();
+                        // pour chaque brique, tester la collision
+                        // stocker dans une liste les briques impactées
+                        // après le foreach des briques, supprimer les briques impactées
+                        // parce qu'on ne peut pas supprimer un élément d'une liste alors qu'on parcourt cette liste
 
-                    for(Brique brique : listeBrique) {
-//                        brique.collision(balle);
-                        if (brique.collision(balle)) {
-                            briqueImpact.add(brique);
+                        ArrayList<Brique> briqueImpact = new ArrayList<>();
+
+                        for (Brique brique : listeBrique) {
+                            // brique.collision(balle);
+                            if (brique.collision(balle)) {
+                                briqueImpact.add(brique);
+                                balle.setVitesseVerticale(-balle.getVitesseVerticale());
+                            }
+                        }
+
+                        for (Brique brique : briqueImpact) {
+                            listeBrique.remove(brique);
+                            double bonusChance = (Math.random());
+                            if (bonusChance < 0.2) {
+                                Bonus bonus = new Bonus(brique.getX() + brique.getLargeur() / 2, brique.getY() + brique.getHauteur());
+                                listeBonus.add(bonus);
+                            }
+                        }
+
+                        if (barre.collision(balle)) {
                             balle.setVitesseVerticale(-balle.getVitesseVerticale());
                         }
+
                     }
 
-                    for(Brique brique : briqueImpact) {
-                        listeBrique.remove(brique);
-                        double bonusChance = (Math.random());
-                        if(bonusChance < 0.2) {
-                            Bonus bonus = new Bonus(brique.getX()+brique.getLargeur() /2, brique.getY() + brique.getHauteur());
-                            listeBonus.add(bonus);
+                    int foundIndex = -1;
+                    for (int i = 0; i < listeBonus.size(); i++) {
+                        Bonus bonus = listeBonus.get(i);
+                        bonus.dessiner(dessin);
+                        bonus.deplacement();
+                        if (barre.collision(bonus)) {
+                            foundIndex = i;
                         }
                     }
 
-                    if(barre.collision(balle)) {
-                        balle.setVitesseVerticale(-balle.getVitesseVerticale());
+                    //  quand barre touche bonus : supprimer et agrandir barre
+                    if (foundIndex >= 0) {
+                        listeBonus.remove(foundIndex);
+                        barre.setLargeur(barre.getLargeur() + 10);
                     }
 
-                }
+                    // balles et bonus > sort si touche bas écran
+                    listeBalle.removeIf(balle -> balle.getY() >= CasseBrique.HAUTEUR - balle.getDiametre() * 2);
+                    listeBonus.removeIf(bonus -> bonus.getY() >= CasseBrique.HAUTEUR - bonus.getDiametre() * 2);
 
-                int foundIndex = -1;
-                for(int i = 0; i < listeBonus.size(); i++){
-                    Bonus bonus = listeBonus.get(i);
-                    bonus.dessiner(dessin);
-                    bonus.deplacement();
-                    if(barre.collision(bonus)) {
-                        foundIndex = i;
+                    // si plus de balles, afficher GAME OVER
+                    if (listeBalle.size() <= 0) {
+                        dessin.drawString("GAME OVER", 200, 300);
                     }
+
+                    for (Bouton bouton : listeBouton) {
+                        bouton.dessiner(dessin);
+                    }
+
+                    dessin.dispose();
+                    this.getBufferStrategy().show();
+
+                    Thread.sleep(1000 / 60); // 60 images seconde
                 }
-
-                //  quand barre touche bonus : supprimer et agrandir barre
-                if(foundIndex >= 0) {
-                    listeBonus.remove(foundIndex);
-                    barre.setLargeur(barre.getLargeur() + 10);
-                }
-
-                // balles et bonus > sort si touche bas écran
-                listeBalle.removeIf(balle -> balle.getY() >= CasseBrique.HAUTEUR - balle.getDiametre() * 2);
-                listeBonus.removeIf(bonus -> bonus.getY() >= CasseBrique.HAUTEUR - bonus.getDiametre() * 2);
-
-                // si plus de balles, afficher GAME OVER
-                if (listeBalle.size() <= 0) {
-                    dessin.drawString("GAME OVER",200, 300);
-                }
-
-                dessin.dispose();
-                this.getBufferStrategy().show();
-
-                Thread.sleep(1000 / 60); // 60 images seconde
             } catch (InterruptedException e) {
                 System.out.println("Processus arrêté");
             }
@@ -171,6 +207,35 @@ public class CasseBrique extends Canvas implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        for (Bouton bouton : listeBouton) {
+            if (bouton.collision(e.getX(), e.getY())) {
+                bouton.clic();
+            }
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
 
     }
 

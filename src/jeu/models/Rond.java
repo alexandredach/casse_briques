@@ -28,11 +28,6 @@ public class Rond extends Sprite {
         }
     }
 
-    public void basEcran() {
-        if (y >= CasseBrique.HAUTEUR - diametre *2) {
-            vitesseVerticale = -vitesseVerticale;
-        }
-    }
 
     public int getDiametre() {
         return diametre;
