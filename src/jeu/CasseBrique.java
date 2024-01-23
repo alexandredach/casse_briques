@@ -51,13 +51,13 @@ public class CasseBrique extends Canvas implements KeyListener, MouseListener {
         this.createBufferStrategy(2);
 
 
-        Bouton boutonPause = new Bouton("PAUSE",20,5);
+        Bouton boutonPause = new Bouton("PAUSE",160,5);
 
         boutonPause.addEvenementBouton(() -> {
                     pause = !pause;
                 });
 
-        Bouton boutonRecommencer = new Bouton("RESTART",120,5);
+        Bouton boutonRecommencer = new Bouton("RESTART",260,5);
 
         boutonRecommencer.addEvenementBouton(() -> {
             recommencer();
@@ -98,6 +98,7 @@ public class CasseBrique extends Canvas implements KeyListener, MouseListener {
             try { // try/catch servira à détecter une éventuelle interruption
 
                 Graphics2D dessin = (Graphics2D) this.getBufferStrategy().getDrawGraphics();
+
 
                 if(!pause) {
 
@@ -171,6 +172,11 @@ public class CasseBrique extends Canvas implements KeyListener, MouseListener {
                         dessin.drawString("GAME OVER", 200, 300);
                     }
 
+                    // si plus de briques, afficher YOU WIN
+                    if (listeBrique.size() <= 0) {
+                        dessin.drawString("YOU WIN !!!", 200, 300);
+                    }
+
                     for (Bouton bouton : listeBouton) {
                         bouton.dessiner(dessin);
                     }
@@ -180,6 +186,7 @@ public class CasseBrique extends Canvas implements KeyListener, MouseListener {
 
                     Thread.sleep(1000 / 60); // 60 images seconde
                 }
+
             } catch (InterruptedException e) {
                 System.out.println("Processus arrêté");
             }
